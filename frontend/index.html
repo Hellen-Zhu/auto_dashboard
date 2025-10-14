@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto Test Admin - 测试用例管理</title>
+
+    <!-- Ant Design CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/antd@5.11.5/dist/reset.css">
+
+    <!-- Custom CSS -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f0f2f5;
+        }
+
+        .header {
+            background: #001529;
+            color: white;
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            height: 64px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+
+        .header-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-right: 40px;
+        }
+
+        .header-nav {
+            display: flex;
+            gap: 32px;
+        }
+
+        .header-nav a {
+            color: rgba(255,255,255,0.65);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .header-nav a:hover,
+        .header-nav a.active {
+            color: white;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 24px auto;
+            padding: 0 24px;
+        }
+
+        .toolbar {
+            background: white;
+            padding: 16px;
+            border-radius: 4px;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        .filters {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+            background: white;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            border-color: #40a9ff;
+            color: #40a9ff;
+        }
+
+        .btn-primary {
+            background: #1890ff;
+            border-color: #1890ff;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #40a9ff;
+            border-color: #40a9ff;
+            color: white;
+        }
+
+        .btn-danger {
+            color: #ff4d4f;
+            border-color: #ff4d4f;
+        }
+
+        .btn-danger:hover {
+            background: #ff4d4f;
+            color: white;
+        }
+
+        select, input {
+            padding: 6px 12px;
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 4px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #fafafa;
+            padding: 16px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        td {
+            padding: 16px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        tr:hover {
+            background: #fafafa;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-right: 4px;
+            background: #e6f7ff;
+            color: #1890ff;
+            border: 1px solid #91d5ff;
+        }
+
+        .tag-green {
+            background: #f6ffed;
+            color: #52c41a;
+            border-color: #b7eb8f;
+        }
+
+        .actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 48px;
+            color: #999;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.45);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 4px;
+            width: 90%;
+            max-width: 1200px;
+            max-height: 90vh;
+            overflow: auto;
+        }
+
+        .modal-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            font-family: monospace;
+        }
+
+        .json-editor {
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+            padding: 12px;
+            background: #282c34;
+            color: #abb2bf;
+            font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+            font-size: 13px;
+            min-height: 300px;
+            overflow: auto;
+        }
+
+        pre {
+            margin: 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-title">Crypto Test Admin</div>
+        <div class="header-nav">
+            <a href="#" class="active">测试用例</a>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Toolbar -->
+        <div class="toolbar">
+            <div class="filters">
+                <select id="serviceFilter">
+                    <option value="">全部 Service</option>
+                </select>
+                <select id="moduleFilter">
+                    <option value="">全部 Module</option>
+                </select>
+                <button class="btn" onclick="loadCases()">刷新</button>
+            </div>
+            <button class="btn btn-primary" onclick="showCreateModal()">+ 创建用例</button>
+        </div>
+
+        <!-- Cases Table -->
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 60px">ID</th>
+                        <th>用例名称</th>
+                        <th style="width: 120px">Service</th>
+                        <th style="width: 120px">Module</th>
+                        <th style="width: 150px">Tags</th>
+                        <th style="width: 80px">步骤数</th>
+                        <th style="width: 180px">创建时间</th>
+                        <th style="width: 200px">操作</th>
+                    </tr>
+                </thead>
+                <tbody id="casesTable">
+                    <tr>
+                        <td colspan="8" class="loading">加载中...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Create/Edit Modal -->
+    <div id="caseModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">创建测试用例</h3>
+                <button class="btn" onclick="closeModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <form id="caseForm">
+                    <input type="hidden" id="caseId">
+
+                    <div class="form-group">
+                        <label>用例名称 *</label>
+                        <input type="text" id="caseName" required>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px;">
+                        <div class="form-group">
+                            <label>Service *</label>
+                            <input type="text" id="caseService" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Module</label>
+                            <input type="text" id="caseModule">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Component</label>
+                            <input type="text" id="caseComponent">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Tags (逗号分隔)</label>
+                        <input type="text" id="caseTags" placeholder="例如: P0, smoke, regression">
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 16px;">
+                        <div class="form-group">
+                            <label>Environments (逗号分隔，留空表示全部环境)</label>
+                            <input type="text" id="caseEnvironments" placeholder="例如: uat, prod">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Jira ID</label>
+                            <input type="text" id="caseJiraId" placeholder="例如: PROJ-123">
+                        </div>
+
+                        <div class="form-group">
+                            <label>状态</label>
+                            <select id="caseIsActive">
+                                <option value="true">激活</option>
+                                <option value="false">未激活</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>描述</label>
+                        <textarea id="caseDescription" rows="3"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>测试配置 (test_config) - JSON格式 *</label>
+                        <small style="color: #999; display: block; margin-bottom: 4px;">必须包含: steps (测试步骤数组), variables (变量字典), validations (验证规则字典)</small>
+                        <div class="json-editor">
+                            <textarea id="caseTestConfig" style="width: 100%; background: transparent; border: none; color: #abb2bf; outline: none; resize: vertical; min-height: 300px;"></textarea>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" onclick="closeModal()">取消</button>
+                <button class="btn btn-primary" onclick="saveCase()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        const API_BASE = 'http://localhost:8000/api';
+        let currentCases = [];
+
+        // Load cases on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadMetadata();
+            loadCases();
+        });
+
+        // Load metadata for filters
+        async function loadMetadata() {
+            try {
+                const [servicesRes, modulesRes] = await Promise.all([
+                    fetch(`${API_BASE}/services`),
+                    fetch(`${API_BASE}/modules`)
+                ]);
+
+                const services = await servicesRes.json();
+                const modules = await modulesRes.json();
+
+                // Populate service filter
+                const serviceFilter = document.getElementById('serviceFilter');
+                services.forEach(service => {
+                    const option = document.createElement('option');
+                    option.value = service;
+                    option.textContent = service;
+                    serviceFilter.appendChild(option);
+                });
+
+                // Populate module filter
+                const moduleFilter = document.getElementById('moduleFilter');
+                modules.forEach(module => {
+                    const option = document.createElement('option');
+                    option.value = module;
+                    option.textContent = module;
+                    moduleFilter.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Failed to load metadata:', error);
+            }
+        }
+
+        // Load cases from API
+        async function loadCases() {
+            const service = document.getElementById('serviceFilter').value;
+            const module = document.getElementById('moduleFilter').value;
+
+            let url = `${API_BASE}/cases?limit=1000`;
+            if (service) url += `&service=${service}`;
+            if (module) url += `&module=${module}`;
+
+            try {
+                const response = await fetch(url);
+                const cases = await response.json();
+                currentCases = cases;
+                renderCases(cases);
+            } catch (error) {
+                console.error('Failed to load cases:', error);
+                document.getElementById('casesTable').innerHTML = '<tr><td colspan="8" style="color: red; text-align: center;">加载失败</td></tr>';
+            }
+        }
+
+        // Render cases table
+        function renderCases(cases) {
+            const tbody = document.getElementById('casesTable');
+
+            if (cases.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: #999;">暂无数据</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = cases.map(c => `
+                <tr>
+                    <td>${c.id}</td>
+                    <td>${c.name}</td>
+                    <td><span class="tag">${c.service}</span></td>
+                    <td>${c.module || '-'}</td>
+                    <td>${(c.tags || []).map(tag => `<span class="tag tag-green">${tag}</span>`).join('')}</td>
+                    <td>${c.test_config?.steps?.length || 0}</td>
+                    <td>${new Date(c.created_at).toLocaleString('zh-CN')}</td>
+                    <td class="actions">
+                        <button class="btn" onclick="editCase(${c.id})">编辑</button>
+                        <button class="btn btn-danger" onclick="deleteCase(${c.id})">删除</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Show create modal
+        function showCreateModal() {
+            document.getElementById('modalTitle').textContent = '创建测试用例';
+            document.getElementById('caseForm').reset();
+            document.getElementById('caseId').value = '';
+            document.getElementById('caseIsActive').value = 'true';
+
+            // Set default JSON template with test_config structure
+            const defaultTestConfig = {
+                steps: [
+                    {
+                        order: 1,
+                        protocol: 'http',
+                        description: '示例步骤',
+                        method: 'GET',
+                        path: '/api/example',
+                        request: {
+                            headers: {'Content-Type': 'application/json'},
+                            params: {},
+                            body: {}
+                        },
+                        validations: [],
+                        outputs: {}
+                    }
+                ],
+                variables: {
+                    example_var: 'example_value'
+                },
+                validations: {
+                    '1': {
+                        expectedStatusCode: 200,
+                        notNull: ['$.result']
+                    }
+                }
+            };
+            document.getElementById('caseTestConfig').value = JSON.stringify(defaultTestConfig, null, 2);
+            document.getElementById('caseModal').classList.add('active');
+        }
+
+        // Edit case
+        async function editCase(id) {
+            try {
+                const response = await fetch(`${API_BASE}/cases/${id}`);
+                const caseData = await response.json();
+
+                document.getElementById('modalTitle').textContent = '编辑测试用例';
+                document.getElementById('caseId').value = caseData.id;
+                document.getElementById('caseName').value = caseData.name;
+                document.getElementById('caseService').value = caseData.service;
+                document.getElementById('caseModule').value = caseData.module || '';
+                document.getElementById('caseComponent').value = caseData.component || '';
+                document.getElementById('caseTags').value = (caseData.tags || []).join(', ');
+                document.getElementById('caseEnvironments').value = (caseData.environments || []).join(', ');
+                document.getElementById('caseJiraId').value = caseData.jira_id || '';
+                document.getElementById('caseIsActive').value = caseData.is_active !== false ? 'true' : 'false';
+                document.getElementById('caseDescription').value = caseData.description || '';
+                document.getElementById('caseTestConfig').value = JSON.stringify(caseData.test_config, null, 2);
+
+                document.getElementById('caseModal').classList.add('active');
+            } catch (error) {
+                alert('加载用例失败: ' + error.message);
+            }
+        }
+
+        // Save case
+        async function saveCase() {
+            try {
+                const id = document.getElementById('caseId').value;
+                const name = document.getElementById('caseName').value;
+                const service = document.getElementById('caseService').value;
+                const module = document.getElementById('caseModule').value;
+                const component = document.getElementById('caseComponent').value;
+                const tags = document.getElementById('caseTags').value.split(',').map(t => t.trim()).filter(t => t);
+                const environments = document.getElementById('caseEnvironments').value.split(',').map(t => t.trim()).filter(t => t);
+                const jiraId = document.getElementById('caseJiraId').value;
+                const isActive = document.getElementById('caseIsActive').value === 'true';
+                const description = document.getElementById('caseDescription').value;
+                const testConfigText = document.getElementById('caseTestConfig').value;
+
+                if (!name || !service) {
+                    alert('请填写必填字段');
+                    return;
+                }
+
+                let testConfig;
+                try {
+                    testConfig = JSON.parse(testConfigText);
+                } catch (e) {
+                    alert('JSON格式错误: ' + e.message);
+                    return;
+                }
+
+                // Validate test_config structure
+                if (!testConfig.steps || !Array.isArray(testConfig.steps)) {
+                    alert('test_config 必须包含 steps 数组');
+                    return;
+                }
+
+                const payload = {
+                    name,
+                    service,
+                    module: module || null,
+                    component: component || null,
+                    tags: tags.length > 0 ? tags : null,
+                    environments: environments.length > 0 ? environments : null,
+                    jira_id: jiraId || null,
+                    is_active: isActive,
+                    description: description || null,
+                    author: 'web_admin',
+                    test_config: testConfig
+                };
+
+                const url = id ? `${API_BASE}/cases/${id}` : `${API_BASE}/cases`;
+                const method = id ? 'PUT' : 'POST';
+
+                const response = await fetch(url, {
+                    method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Save failed');
+                }
+
+                alert(id ? '更新成功' : '创建成功');
+                closeModal();
+                loadCases();
+            } catch (error) {
+                alert('保存失败: ' + error.message);
+            }
+        }
+
+        // Delete case
+        async function deleteCase(id) {
+            if (!confirm('确认删除此用例？')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/cases/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (!response.ok) {
+                    throw new Error('Delete failed');
+                }
+
+                alert('删除成功');
+                loadCases();
+            } catch (error) {
+                alert('删除失败: ' + error.message);
+            }
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('caseModal').classList.remove('active');
+        }
+    </script>
+</body>
+</html>

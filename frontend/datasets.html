@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据集管理 - Crypto Test Admin</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f0f2f5;
+        }
+
+        .header {
+            background: #001529;
+            color: white;
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            height: 64px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+
+        .header-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-right: 40px;
+        }
+
+        .header-nav {
+            display: flex;
+            gap: 32px;
+        }
+
+        .header-nav a {
+            color: rgba(255,255,255,0.65);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .header-nav a:hover,
+        .header-nav a.active {
+            color: white;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 24px auto;
+            padding: 0 24px;
+        }
+
+        .breadcrumb {
+            background: white;
+            padding: 12px 16px;
+            border-radius: 4px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        .breadcrumb a {
+            color: #1890ff;
+            text-decoration: none;
+        }
+
+        .breadcrumb span {
+            color: #666;
+            margin: 0 8px;
+        }
+
+        .page-header {
+            background: white;
+            padding: 24px;
+            border-radius: 4px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        .page-header h2 {
+            margin-bottom: 8px;
+        }
+
+        .page-header .subtitle {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .toolbar {
+            background: white;
+            padding: 16px;
+            border-radius: 4px;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+            background: white;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            border-color: #40a9ff;
+            color: #40a9ff;
+        }
+
+        .btn-primary {
+            background: #1890ff;
+            border-color: #1890ff;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #40a9ff;
+            border-color: #40a9ff;
+            color: white;
+        }
+
+        .btn-danger {
+            color: #ff4d4f;
+            border-color: #ff4d4f;
+        }
+
+        .btn-danger:hover {
+            background: #ff4d4f;
+            color: white;
+        }
+
+        .btn-link {
+            border: none;
+            background: transparent;
+            color: #1890ff;
+            padding: 4px 8px;
+        }
+
+        .btn-link:hover {
+            background: #e6f7ff;
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 4px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #fafafa;
+            padding: 16px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        td {
+            padding: 16px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        tr:hover {
+            background: #fafafa;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-right: 4px;
+        }
+
+        .tag-blue {
+            background: #e6f7ff;
+            color: #1890ff;
+            border: 1px solid #91d5ff;
+        }
+
+        .tag-green {
+            background: #f6ffed;
+            color: #52c41a;
+            border: 1px solid #b7eb8f;
+        }
+
+        .tag-red {
+            background: #fff1f0;
+            color: #ff4d4f;
+            border: 1px solid #ffccc7;
+        }
+
+        .tag-orange {
+            background: #fff7e6;
+            color: #fa8c16;
+            border: 1px solid #ffd591;
+        }
+
+        .actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 48px;
+            color: #999;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 48px;
+            color: #999;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.45);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 4px;
+            width: 90%;
+            max-width: 900px;
+            max-height: 90vh;
+            overflow: auto;
+        }
+
+        .modal-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+
+        .form-group label .required {
+            color: #ff4d4f;
+            margin-left: 4px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            font-family: monospace;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .json-editor {
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+            padding: 12px;
+            background: #282c34;
+            color: #abb2bf;
+            font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+            font-size: 13px;
+            min-height: 200px;
+            overflow: auto;
+        }
+
+        .json-editor textarea {
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: #abb2bf;
+            outline: none;
+            resize: vertical;
+            min-height: 200px;
+        }
+
+        .checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .checkbox input[type="checkbox"] {
+            width: auto;
+        }
+
+        .hint {
+            font-size: 12px;
+            color: #999;
+            margin-top: 4px;
+        }
+
+        .multi-select {
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+            padding: 4px;
+            min-height: 80px;
+        }
+
+        .multi-select label {
+            display: block;
+            padding: 4px 8px;
+            cursor: pointer;
+        }
+
+        .multi-select label:hover {
+            background: #f5f5f5;
+        }
+
+        .multi-select input[type="checkbox"] {
+            margin-right: 8px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .badge-success {
+            background: #f6ffed;
+            color: #52c41a;
+        }
+
+        .badge-error {
+            background: #fff1f0;
+            color: #ff4d4f;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-title">Crypto Test Admin</div>
+        <div class="header-nav">
+            <a href="index.html">测试用例</a>
+            <a href="#" class="active">数据集管理</a>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Breadcrumb -->
+        <div class="breadcrumb">
+            <a href="index.html">测试用例</a>
+            <span>></span>
+            <span id="caseName">数据集管理</span>
+        </div>
+
+        <!-- Page Header -->
+        <div class="page-header">
+            <h2 id="pageTitle">数据集管理</h2>
+            <div class="subtitle">为测试用例 <strong id="caseNameSubtitle"></strong> 管理参数化数据集</div>
+        </div>
+
+        <!-- Toolbar -->
+        <div class="toolbar">
+            <div>
+                <a href="index.html" class="btn">← 返回用例列表</a>
+            </div>
+            <button class="btn btn-primary" onclick="showCreateModal()">+ 添加数据集</button>
+        </div>
+
+        <!-- DataSets Table -->
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 60px">ID</th>
+                        <th>数据集名称</th>
+                        <th style="width: 120px">Jira ID</th>
+                        <th style="width: 200px">适用环境</th>
+                        <th style="width: 100px">变量数量</th>
+                        <th style="width: 80px">状态</th>
+                        <th style="width: 200px">操作</th>
+                    </tr>
+                </thead>
+                <tbody id="datasetsTable">
+                    <tr>
+                        <td colspan="7" class="loading">加载中...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Create/Edit DataSet Modal -->
+    <div id="datasetModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">添加数据集</h3>
+                <button class="btn" onclick="closeModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <form id="datasetForm">
+                    <input type="hidden" id="datasetId">
+                    <input type="hidden" id="caseId">
+
+                    <div class="form-group">
+                        <label>数据集名称<span class="required">*</span></label>
+                        <input type="text" id="datasetName" required placeholder="例如: 正常参数、边界值测试">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Jira ID</label>
+                            <input type="text" id="jiraId" placeholder="例如: PROJ-123">
+                            <div class="hint">关联的Jira任务ID（可选）</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>状态</label>
+                            <div class="checkbox">
+                                <input type="checkbox" id="isActive" checked>
+                                <label for="isActive">启用此数据集</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>适用环境</label>
+                        <div id="environmentsCheckboxes" class="multi-select">
+                            <div class="hint" style="padding: 8px;">留空表示适用于所有环境</div>
+                        </div>
+                        <div class="hint">选择此数据集适用的环境，不选择则在所有环境下运行</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>测试数据变量 (JSON格式)<span class="required">*</span></label>
+                        <div class="json-editor">
+                            <textarea id="variablesJson" placeholder='例如:
+{
+  "symbol": "BTC_USD",
+  "timeframe": "1h",
+  "count": 100
+}'></textarea>
+                        </div>
+                        <div class="hint">定义测试数据变量，可在用例中通过 {{@variable_name}} 引用</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>验证规则覆盖 (JSON格式，可选)</label>
+                        <div class="json-editor">
+                            <textarea id="validationsJson" placeholder='例如:
+{
+  "step_1": {
+    "validations": [
+      {"type": "status_code", "expected": 400}
+    ]
+  }
+}'></textarea>
+                        </div>
+                        <div class="hint">覆盖测试用例中定义的验证规则（可选）</div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" onclick="closeModal()">取消</button>
+                <button class="btn btn-primary" onclick="saveDataset()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        const API_BASE = 'http://localhost:8000/api';
+        let currentCaseId = null;
+        let currentDatasets = [];
+        let environments = [];
+
+        // Get case ID from URL parameter
+        function getCaseIdFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('caseId');
+        }
+
+        // Load page on DOM ready
+        document.addEventListener('DOMContentLoaded', () => {
+            currentCaseId = getCaseIdFromUrl();
+
+            if (!currentCaseId) {
+                alert('未指定测试用例ID');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            loadCaseInfo();
+            loadEnvironments();
+            loadDatasets();
+        });
+
+        // Load case information
+        async function loadCaseInfo() {
+            try {
+                const response = await fetch(`${API_BASE}/cases/${currentCaseId}`);
+                const caseData = await response.json();
+
+                document.getElementById('caseName').textContent = caseData.name;
+                document.getElementById('caseNameSubtitle').textContent = caseData.name;
+                document.getElementById('pageTitle').textContent = `数据集管理 - ${caseData.name}`;
+            } catch (error) {
+                console.error('Failed to load case info:', error);
+            }
+        }
+
+        // Load environments for checkbox
+        async function loadEnvironments() {
+            try {
+                const response = await fetch(`${API_BASE}/environments`);
+                environments = await response.json();
+
+                // Get unique environment names
+                const uniqueEnvs = [...new Set(environments.map(env => env.name))];
+
+                const container = document.getElementById('environmentsCheckboxes');
+                container.innerHTML = uniqueEnvs.map(envName => `
+                    <label>
+                        <input type="checkbox" name="env" value="${envName}">
+                        ${envName}
+                    </label>
+                `).join('');
+            } catch (error) {
+                console.error('Failed to load environments:', error);
+            }
+        }
+
+        // Load datasets
+        async function loadDatasets() {
+            try {
+                const response = await fetch(`${API_BASE}/cases/${currentCaseId}/datasets`);
+                const datasets = await response.json();
+                currentDatasets = datasets;
+                renderDatasets(datasets);
+            } catch (error) {
+                console.error('Failed to load datasets:', error);
+                document.getElementById('datasetsTable').innerHTML =
+                    '<tr><td colspan="7" style="color: red; text-align: center;">加载失败</td></tr>';
+            }
+        }
+
+        // Render datasets table
+        function renderDatasets(datasets) {
+            const tbody = document.getElementById('datasetsTable');
+
+            if (datasets.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="empty">暂无数据集，点击"添加数据集"创建第一个</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = datasets.map(ds => {
+                const envTags = ds.environments && ds.environments.length > 0
+                    ? ds.environments.map(env => `<span class="tag tag-blue">${env}</span>`).join('')
+                    : '<span class="tag">全部环境</span>';
+
+                const variableCount = Object.keys(ds.variables || {}).length;
+                const statusBadge = ds.is_active
+                    ? '<span class="badge badge-success">启用</span>'
+                    : '<span class="badge badge-error">禁用</span>';
+
+                const jiraTag = ds.jira_id
+                    ? `<span class="tag tag-orange">${ds.jira_id}</span>`
+                    : '-';
+
+                return `
+                    <tr>
+                        <td>${ds.id}</td>
+                        <td>${ds.data_set_name}</td>
+                        <td>${jiraTag}</td>
+                        <td>${envTags}</td>
+                        <td>${variableCount}</td>
+                        <td>${statusBadge}</td>
+                        <td class="actions">
+                            <button class="btn btn-link" onclick="editDataset(${ds.id})">编辑</button>
+                            <button class="btn btn-link" onclick="viewVariables(${ds.id})">查看变量</button>
+                            <button class="btn btn-link btn-danger" onclick="deleteDataset(${ds.id})">删除</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Show create modal
+        function showCreateModal() {
+            document.getElementById('modalTitle').textContent = '添加数据集';
+            document.getElementById('datasetForm').reset();
+            document.getElementById('datasetId').value = '';
+            document.getElementById('caseId').value = currentCaseId;
+            document.getElementById('isActive').checked = true;
+
+            // Clear environment checkboxes
+            document.querySelectorAll('#environmentsCheckboxes input[type="checkbox"]').forEach(cb => {
+                cb.checked = false;
+            });
+
+            // Set default JSON
+            document.getElementById('variablesJson').value = JSON.stringify({
+                "example_var": "example_value"
+            }, null, 2);
+            document.getElementById('validationsJson').value = '';
+
+            document.getElementById('datasetModal').classList.add('active');
+        }
+
+        // Edit dataset
+        async function editDataset(id) {
+            try {
+                const response = await fetch(`${API_BASE}/datasets/${id}`);
+                const dataset = await response.json();
+
+                document.getElementById('modalTitle').textContent = '编辑数据集';
+                document.getElementById('datasetId').value = dataset.id;
+                document.getElementById('caseId').value = dataset.case_id;
+                document.getElementById('datasetName').value = dataset.data_set_name;
+                document.getElementById('jiraId').value = dataset.jira_id || '';
+                document.getElementById('isActive').checked = dataset.is_active;
+
+                // Set environment checkboxes
+                document.querySelectorAll('#environmentsCheckboxes input[type="checkbox"]').forEach(cb => {
+                    cb.checked = dataset.environments && dataset.environments.includes(cb.value);
+                });
+
+                document.getElementById('variablesJson').value = JSON.stringify(dataset.variables, null, 2);
+                document.getElementById('validationsJson').value = dataset.validations_override
+                    ? JSON.stringify(dataset.validations_override, null, 2)
+                    : '';
+
+                document.getElementById('datasetModal').classList.add('active');
+            } catch (error) {
+                alert('加载数据集失败: ' + error.message);
+            }
+        }
+
+        // View variables (read-only modal)
+        function viewVariables(id) {
+            const dataset = currentDatasets.find(ds => ds.id === id);
+            if (!dataset) return;
+
+            alert('变量内容:\n\n' + JSON.stringify(dataset.variables, null, 2));
+        }
+
+        // Save dataset
+        async function saveDataset() {
+            try {
+                const id = document.getElementById('datasetId').value;
+                const caseId = document.getElementById('caseId').value;
+                const datasetName = document.getElementById('datasetName').value;
+                const jiraId = document.getElementById('jiraId').value;
+                const isActive = document.getElementById('isActive').checked;
+                const variablesText = document.getElementById('variablesJson').value;
+                const validationsText = document.getElementById('validationsJson').value;
+
+                // Get selected environments
+                const selectedEnvs = Array.from(
+                    document.querySelectorAll('#environmentsCheckboxes input[type="checkbox"]:checked')
+                ).map(cb => cb.value);
+
+                if (!datasetName) {
+                    alert('请填写数据集名称');
+                    return;
+                }
+
+                let variables;
+                try {
+                    variables = JSON.parse(variablesText || '{}');
+                } catch (e) {
+                    alert('变量JSON格式错误: ' + e.message);
+                    return;
+                }
+
+                let validationsOverride = null;
+                if (validationsText.trim()) {
+                    try {
+                        validationsOverride = JSON.parse(validationsText);
+                    } catch (e) {
+                        alert('验证规则JSON格式错误: ' + e.message);
+                        return;
+                    }
+                }
+
+                const payload = {
+                    data_set_name: datasetName,
+                    variables: variables,
+                    validations_override: validationsOverride,
+                    environments: selectedEnvs.length > 0 ? selectedEnvs : null,
+                    jira_id: jiraId || null,
+                    is_active: isActive
+                };
+
+                if (!id) {
+                    // Create new dataset
+                    payload.case_id = parseInt(caseId);
+                }
+
+                const url = id ? `${API_BASE}/datasets/${id}` : `${API_BASE}/datasets`;
+                const method = id ? 'PUT' : 'POST';
+
+                const response = await fetch(url, {
+                    method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Save failed');
+                }
+
+                alert(id ? '更新成功' : '创建成功');
+                closeModal();
+                loadDatasets();
+            } catch (error) {
+                alert('保存失败: ' + error.message);
+            }
+        }
+
+        // Delete dataset
+        async function deleteDataset(id) {
+            if (!confirm('确认删除此数据集？')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/datasets/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (!response.ok) {
+                    throw new Error('Delete failed');
+                }
+
+                alert('删除成功');
+                loadDatasets();
+            } catch (error) {
+                alert('删除失败: ' + error.message);
+            }
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('datasetModal').classList.remove('active');
+        }
+    </script>
+</body>
+</html>
